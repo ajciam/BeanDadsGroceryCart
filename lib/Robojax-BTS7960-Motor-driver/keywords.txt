@@ -1,0 +1,30 @@
+###########################################
+# Syntax Coloring Map For RobojaxBTS7960
+###########################################
+
+###########################################
+# Datatypes (KEYWORD1)
+###########################################
+
+RobojaxBTS7960	KEYWORD1
+
+###########################################
+# Methods and Functions (KEYWORD2)
+###########################################
+motor	KEYWORD2
+begin	KEYWORD2
+clear	KEYWORD2
+pwm	KEYWORD2
+en	KEYWORD2
+is	KEYWORD2
+speed	KEYWORD2
+control	KEYWORD2
+rotate  KEYWORD2
+left	KEYWORD2
+right  KEYWORD2
+start	KEYWORD2
+stop  KEYWORD2
+robojax	KEYWORD2
+###########################################
+# Constants (LITERAL1)
+###########################################
