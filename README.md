@@ -25,3 +25,6 @@ It has some differneces versus the Ardunio IDE mainly
 4) platformio.ini acts as the config file. You can change Baudrates and other things there like which board is running
 5) Libaries must be called in each proejct file. In the Arudnio IDE calling a libaray once makes it avaliable for all skecthes
 6) Files are saved so .cpp files versus Ardunio IDE .ino. They work the same.
+
+
+For example Structure go to https://github.com/platformio/platform-atmelavr/tree/develop/examples
