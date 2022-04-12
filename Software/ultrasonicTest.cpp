@@ -1,7 +1,6 @@
-#include <Ardunio.h>
+#include <Arduino.h>
 #include <NewPing.h>
 #include <Wire.h>
-#include <Servo.h>
 
 #define MAX_DISTANCE 250
 #define OUT_PAYLOAD_SIZE 1
