@@ -57,7 +57,11 @@ void setup()
 // Main Loop
 void loop()
 {
+<<<<<<< HEAD
 motorController2.TurnRight(255);    //0-255 pmw, 85=30% 230=90%
 motorController1.TurnRight(255);  
+=======
+motorController1.TurnRight(85);    //Runs at around 50% power Motor runs at 330 rpm no load from data
+>>>>>>> 2ff14881332f9d5cf3b8d2ce4fb45c6e26d4c480
 delay(5000);
 }
