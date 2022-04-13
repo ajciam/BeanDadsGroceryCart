@@ -6,13 +6,13 @@ Main Code for robot Movement, and soon sensors. Sensors would be contained in di
 
 
 // pins for motor 1
-#define RPWM_1 3 // define pin 3 for RPWM pin (output)
-#define R_EN_1 4 // define pin 2 for R_EN pin (input)
-#define R_IS_1 5 // define pin 5 for R_IS pin (output)
+#define RPWM_1 2 // define pin 3 for RPWM pin (output)
+#define R_EN_1 8 // define pin 2 for R_EN pin (input)
+#define R_IS_1 52 // define pin 5 for R_IS pin (output)
 
-#define LPWM_1 6 // define pin 6 for LPWM pin (output)
-#define L_EN_1 7 // define pin 7 for L_EN pin (input)
-#define L_IS_1 8 // define pin 8 for L_IS pin (output)
+#define LPWM_1 3 // define pin 6 for LPWM pin (output)
+#define L_EN_1 8 // define pin 7 for L_EN pin (input)
+#define L_IS_1 50 // define pin 8 for L_IS pin (output)
 // motor 1 pins end here
 
 // pins for motor 2
@@ -55,28 +55,28 @@ void loop() {
     motor1.stop();// stop the motor 1
     delay(3000);  // stop for 3 seconds
 
-    motor2.rotate(100,CW);// run motor 2 with 100% speed in CW direction
-    delay(5000);//run for 5 seconds
-    motor2.stop();// stop the motor 2
-    delay(3000);// stop for 3 seconds
-    motor2.rotate(100,CCW);// run motor 2 at 100% speed in CCW direction
-    delay(5000);// run for 5 seconds
-    motor2.stop();// stop the motor 2
-    delay(3000);  // stop for 3 seconds
+    // motor2.rotate(100,CW);// run motor 2 with 100% speed in CW direction
+    // delay(5000);//run for 5 seconds
+    // motor2.stop();// stop the motor 2
+    // delay(3000);// stop for 3 seconds
+    // motor2.rotate(100,CCW);// run motor 2 at 100% speed in CCW direction
+    // delay(5000);// run for 5 seconds
+    // motor2.stop();// stop the motor 2
+    // delay(3000);  // stop for 3 seconds
 
     
   // slowly speed up the motor 1 from 0 to 100% speed
-    for(int i=0; i<=100; i++){ 
-        motor1.rotate(i,CCW);
-        delay(50);
-    } 
+    // for(int i=0; i<=100; i++){ 
+    //     motor1.rotate(i,CCW);
+    //     delay(50);
+    // } 
   
-   // slow down the motor  2 from 100% to 0 with 
-    for(int i=100; i>0; i--){ 
-        motor2.rotate(i,CCW);
-        delay(50);
-    } 
-    motor2.stop();// stop motor 2
-    delay(3000); // stop for 3 seconds        
- // BTS7960 more than 1 Motor Control Code by Robojax.com 20190622  
-}// loop ends
+  //  // slow down the motor  2 from 100% to 0 with 
+  //   for(int i=100; i>0; i--){ 
+  //       motor2.rotate(i,CCW);
+  //       delay(50);
+  //   } 
+//     motor2.stop();// stop motor 2
+//     delay(3000); // stop for 3 seconds        
+//  // BTS7960 more than 1 Motor Control Code by Robojax.com 20190622  
+ }// loop ends

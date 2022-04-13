@@ -80,16 +80,16 @@ void RobojaxBTS7960::rotate(int value, int dir) {
 		pwm1Pin =this->_in_r;
 		pwm2Pin =this->_in_L;		
 	}
-	if(this->_debug){
-		digitalWrite(pwm1Pin, LOW);
-		Serial.print("PWM1: ");
-		Serial.print(pwm1Pin);
-		Serial.print(" PWM2: ");
-		Serial.print(pwm2Pin);
-		Serial.print(" PWM value: ");
-		Serial.print(value);
-		Serial.println("%");		
-	}
+	// if(this->_debug){
+	// 	digitalWrite(pwm1Pin, LOW);
+	// 	Serial.print("PWM1: ");
+	// 	Serial.print(pwm1Pin);
+	// 	Serial.print(" PWM2: ");
+	// 	Serial.print(pwm2Pin);
+	// 	Serial.print(" PWM value: ");
+	// 	Serial.print(value);
+	// 	Serial.println("%");		
+	// }
      
 
     if(value >=0 && value <=100 ){
@@ -107,9 +107,9 @@ void RobojaxBTS7960::rotate(int value, int dir) {
 void RobojaxBTS7960::stop(){
     digitalWrite(this->_in_r, LOW);
 	digitalWrite(this->_in_L, LOW);
-	if(this->_debug){
-		Serial.println("Motor stopped");
-	}	
+	// if(this->_debug){
+	// 	Serial.println("Motor stopped");
+	// }	
 }//stop()
 
 /*

@@ -73,6 +73,9 @@ void loop() {
   }
 
   // signal the motor
+if(dir == 1) 
+
+
   setMotor(dir,pwr,PWM,IN1,IN2);
 
 
