@@ -7,14 +7,18 @@
 #define ENCB 19 // White
 
 #define EN 8
-#define L_PWM 3
-#define R_PWM 2
+#define L_PWM 4
+#define R_PWM 5
 
 volatile int posi = 0; // specify posi as volatile: https://www.arduino.cc/reference/en/language/variables/variable-scope-qualifiers/volatile/
+
+//Max speed PWM signal
+double MAX_SPEED=255;
 // PID Variables
 long prevT = 0;
 float eprev = 0;
 float eintegral = 0;
+
 
 // Fucntions: setMotor and readEncoder
 
@@ -34,6 +38,9 @@ void readEncoder()
   }
 }
 
+
+
+
 // Setup
 void setup()
 {
@@ -52,11 +59,11 @@ void setup()
 void loop()
 {
   // set target position
-  // int target = 1200;
-  int target = 250 * sin(prevT / 1e6);
+  int target = 120000;
+  //int target = 1250 * sin(prevT / 1e6);
 
   // PID constants
-  float kp = 1;
+  float kp = 0;
   float kd = 0;
   float ki = 0.0;
 
@@ -88,8 +95,8 @@ void loop()
 
   // motor power
   float pwr = fabs(u);
-  if( pwr > 255 ){
-    pwr = 255;
+  if( pwr > MAX_SPEED ){
+    pwr = MAX_SPEED;
   }
 
   // motor direction

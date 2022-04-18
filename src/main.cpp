@@ -25,7 +25,13 @@ Main Code for robot Movement, and soon sensors. Sensors would be contained in di
 #define L_IS_2 A1 // define pin 8 for L_IS pin (output)
 // motor 2 pins end here
 
-
+#define EN_1 8
+#define L_PWM_1 3
+#define R_PWM_1 2
+// Right Motor
+#define EN_2 8
+#define L_PWM_2 4
+#define R_PWM_2 5
 
 #define CW 1 //
 #define CCW 0 //
