@@ -184,6 +184,7 @@ void loop() {
   pos[3] = receiveLong();
 
   // Read the position in an atomic block to avoid a potential misread 
+  
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     for(int k = 0; k < NMOTORS; k++){
       pos[k] = posi[k];

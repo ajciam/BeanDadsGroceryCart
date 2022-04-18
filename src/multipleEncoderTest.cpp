@@ -1,8 +1,8 @@
 #include <Arduino.h>
-#include <util/atomic.h> 
-#include <Wire.h>
+#include <util/atomic.h>   //For time
+#include <Wire.h>  //i2c com
 #include <math.h>
-#include "BTS7960.h"        //Motor Driver Lib. 2 first one has bugs
+#include "BTS7960.h"        //Motor Driver Libaray for the double H-Brdige BTS7960
 
 
 /*------------ CLASS ------------*/
@@ -54,11 +54,11 @@ class SimplePID{
 #define M0 0
 #define M1 1
 const int enca[] = {18,16};
-const int encb[]= {17,19};
-const int pwm_A[] = {9,13};
-const int pwm_B[] = {17,19};
-const int in1[] = {8,11};
-const int in2[] = {10,12};
+const int encb[]= {19,17};
+const int pwm_R[] = {2,5};
+const int pwm_L[] = {3,4};
+const int EN[] = {8,8}; //Enable pins for motors
+
 
 // Global variables
 long prevT = 0;
@@ -69,25 +69,31 @@ volatile int posi[] = {0,0};
 
 // PID classes
 SimplePID pid[NMOTORS];
+//Motor Classes
+//BTS7960 motorController[NMOTORS]; // define motor 1 objects
 
 
 /*------------ FUNCTIONS ------------*/
-void setMotor(int dir, int pwmVal, int pwm, int in1, int in2){
-  analogWrite(pwm,pwmVal);
-  if(dir == 1){
-    digitalWrite(in1,HIGH);
-    digitalWrite(in2,LOW);
+
+
+void setMotor(int dir, int pwmVal, int pwm_R, int pwm_L){
+  int PWMPIN_LEFT = pwm_L;
+  int PWMPIN_RIGHT = pwm_R;
+  if(dir == -1){
+    analogWrite(PWMPIN_LEFT, 0);
+	  delayMicroseconds(100);
+    analogWrite(PWMPIN_RIGHT, pwmVal);
   }
-  else if(dir == -1){
-    digitalWrite(in1,LOW);
-    digitalWrite(in2,HIGH);
+  else if(dir == 1){
+    analogWrite(PWMPIN_RIGHT, 0);
+	  delayMicroseconds(100);
+    analogWrite(PWMPIN_LEFT, pwmVal);
   }
   else{
-    digitalWrite(in1,LOW);
-    digitalWrite(in2,LOW);
+    analogWrite(PWMPIN_LEFT, LOW);
+    analogWrite(PWMPIN_RIGHT, HIGH);
   }  
 }
-
 template <int j>
 void readEncoder(){
   int b = digitalRead(encb[j]);
@@ -99,21 +105,21 @@ void readEncoder(){
   }
 }
 
-void sendLong(long value){
-  for(int k=0; k<4; k++){
-    byte out = (value >> 8*(3-k)) & 0xFF;
-    Wire.write(out);
-  }
-}
+// void sendLong(long value){
+//   for(int k=0; k<4; k++){
+//     byte out = (value >> 8*(3-k)) & 0xFF;
+//     Wire.write(out);
+//   }
+// }
 
-long receiveLong(){
-  long outValue;
-  for(int k=0; k<4; k++){
-    byte nextByte = Wire.read();
-    outValue = (outValue << 8) | nextByte;
-  }
-  return outValue;
-}
+// long receiveLong(){
+//   long outValue;
+//   for(int k=0; k<4; k++){
+//     byte nextByte = Wire.read();
+//     outValue = (outValue << 8) | nextByte;
+//   }
+//   return outValue;
+// }
 
 // targets
 float target_f[] = {0,0,0,0};
@@ -122,8 +128,8 @@ long target[] = {0,0,0,0};
 void setTarget(float t, float deltat){
 
   float positionChange[4] = {0.0,0.0,0.0,0.0};
-  float pulsesPerTurn = 16*18.75; 
-  float pulsesPerMeter = pulsesPerTurn*3.5368;
+  float pulsesPerTurn = 16*30; //16 pules per revolution * Gear Ratio
+  float pulsesPerMeter = pulsesPerTurn*2.0886;  //Pulses per turn*(1/Wheel cirumfernce (m))
 
   t = fmod(t,12); // time is in seconds
   float velocity = 0.25; // m/s
@@ -155,15 +161,16 @@ void setup() {
   Wire.begin();        // join i2c bus
   Serial.begin(9600);
   for(int k = 0; k < NMOTORS; k++){
+    pinMode(EN[k],OUTPUT);
+    digitalWrite(EN[k],HIGH); //Enable motor Driver
     pinMode(enca[k],INPUT);
     pinMode(encb[k],INPUT);
-    pid[k].setParams(1,0.1,0,255);
+    pid[k].setParams(1,0,0,255);
   }
   attachInterrupt(digitalPinToInterrupt(enca[M0]),readEncoder<M0>,RISING);
   attachInterrupt(digitalPinToInterrupt(enca[M1]),readEncoder<M1>,RISING);
   
 }
-
 /*------------ LOOP ------------*/
 void loop() {
 
@@ -176,18 +183,13 @@ void loop() {
   setTarget(currT/1.0e6,deltaT);
   
   // Send the requested position to the follower
-  Wire.beginTransmission(1); 
-  sendLong(target[2]);
-  sendLong(target[3]);
-  Wire.endTransmission();
+  
 
   // Get the current position from the follower
-  long pos[4];
-  Wire.requestFrom(1, 8);    
-  pos[2] = receiveLong();
-  pos[3] = receiveLong();
+  
 
   // Read the position in an atomic block to avoid a potential misread 
+  int pos[] = {0,0};
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     for(int k = 0; k < NMOTORS; k++){
       pos[k] = posi[k];
@@ -198,17 +200,21 @@ void loop() {
   for(int k = 0; k < NMOTORS; k++){
     int pwr, dir;
     pid[k].evalu(pos[k],target[k],deltaT,pwr,dir); // compute the position
-    setMotor(dir,pwr,pwm[k],in1[k],in2[k]); // signal the motor
+    //setMotor(dir,pwr,pwm[k],in1[k],in2[k]); // signal the motor
+    setMotor(dir,pwr,pwm_R[k],pwm_L[k]); //signal the motor
+  
   }
 
-  for(int i = 0; i<4; i++){
+  for(int i = 0; i<2; i++){
     Serial.print(target[i]);
     Serial.print(" ");
   }
-  for(int i = 0; i<4; i++){
+  for(int i = 0; i<2; i++){
     Serial.print(pos[i]);
     Serial.print(" ");
   }
   Serial.println();
+
+  //setMotor(-1,50,pwm_R[0],pwm_L[0]);
   
 }

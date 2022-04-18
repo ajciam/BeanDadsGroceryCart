@@ -7,8 +7,8 @@
 #define ENCB 19 // White
 
 #define EN 8
-#define L_PWM 4
-#define R_PWM 5
+#define L_PWM 3
+#define R_PWM 2
 
 volatile int posi = 0; // specify posi as volatile: https://www.arduino.cc/reference/en/language/variables/variable-scope-qualifiers/volatile/
 
@@ -40,7 +40,6 @@ void readEncoder()
 
 
 
-
 // Setup
 void setup()
 {
@@ -59,11 +58,11 @@ void setup()
 void loop()
 {
   // set target position
-  int target = 120000;
-  //int target = 1250 * sin(prevT / 1e6);
+  //int target = 120000;
+  int target = 1250 * sin(prevT / 1e6);
 
   // PID constants
-  float kp = 0;
+  float kp = 1;
   float kd = 0;
   float ki = 0.0;
 
@@ -113,7 +112,6 @@ void loop()
     motorController1.TurnLeft(pwr);
   }
   else{
-
   }
 
   // store previous error
