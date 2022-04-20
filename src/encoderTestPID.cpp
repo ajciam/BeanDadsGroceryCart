@@ -3,12 +3,12 @@
 #include <RobojaxBTS7960.h> //Motor Driver Lib.
 #include "BTS7960.h"        //Motor Driver Lib. 2 first one has bugs
 
-#define ENCA 18 // Yellow Encoder Pinout: Gray END GGround, Blue Encoder VCC (3.3v to 24v)
-#define ENCB 19 // White
+#define ENCA 2 // Yellow Encoder Pinout: Gray END GGround, Blue Encoder VCC (3.3v to 24v)
+#define ENCB 3 // White
 
 #define EN 8
-#define L_PWM 3
-#define R_PWM 2
+#define L_PWM 7
+#define R_PWM 6
 
 volatile int posi = 0; // specify posi as volatile: https://www.arduino.cc/reference/en/language/variables/variable-scope-qualifiers/volatile/
 
@@ -44,7 +44,7 @@ void readEncoder()
 void setup()
 {
   // BTS7960 Motor Control Code by Robojax.com 20190622
-  Serial.begin(9600); // setup Serial Monitor to display information
+  Serial.begin(115200); // setup Serial Monitor to display information
 
   pinMode(ENCA, INPUT); // Encoder Pin setup
   pinMode(ENCB, INPUT);

@@ -13,7 +13,7 @@ class SimplePID{
     
   public:
     // Default initialization list
-    SimplePID() : kp(1), kd(0), ki(0), umax(255), eprev(0.0), eintegral(0.0) {}
+    SimplePID() : kp(0), kd(0), ki(0), umax(255), eprev(0.0), eintegral(0.0) {}
     
     // Set the parameters
     void setParams(float kpIn, float kdIn, float kiIn, float umaxIn){
@@ -53,10 +53,10 @@ class SimplePID{
 #define NMOTORS 2
 #define M0 0
 #define M1 1
-const int enca[] = {18,16};
-const int encb[]= {19,17};
-const int pwm_R[] = {2,5};
-const int pwm_L[] = {3,4};
+const int enca[] = {18,2};
+const int encb[]= {19,3};
+const int pwm_R[] = {5,6};
+const int pwm_L[] = {4,7};
 const int EN[] = {8,8}; //Enable pins for motors
 
 
@@ -132,7 +132,7 @@ void setTarget(float t, float deltat){
   float pulsesPerMeter = pulsesPerTurn*2.0886;  //Pulses per turn*(1/Wheel cirumfernce (m))
 
   t = fmod(t,12); // time is in seconds
-  float velocity = 0.25; // m/s
+  float velocity = .1; // m/s
 
   if(t < 4){
   }
@@ -152,8 +152,6 @@ void setTarget(float t, float deltat){
   }
   target[0] = (long) target_f[0];
   target[1] = (long) target_f[1];
-  target[2] = (long) -target_f[2];
-  target[3] = (long) -target_f[3];
 }
 
 /*------------ SETUP ------------*/
