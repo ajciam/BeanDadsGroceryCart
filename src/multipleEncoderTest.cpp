@@ -13,7 +13,7 @@ class SimplePID{
     
   public:
     // Default initialization list
-    SimplePID() : kp(0), kd(0), ki(0), umax(255), eprev(0.0), eintegral(0.0) {}
+    SimplePID() : kp(1), kd(0), ki(0), umax(255), eprev(0.0), eintegral(0.0) {}
     
     // Set the parameters
     void setParams(float kpIn, float kdIn, float kiIn, float umaxIn){
@@ -132,7 +132,7 @@ void setTarget(float t, float deltat){
   float pulsesPerMeter = pulsesPerTurn*2.0886;  //Pulses per turn*(1/Wheel cirumfernce (m))
 
   t = fmod(t,12); // time is in seconds
-  float velocity = .1; // m/s
+  float velocity = .5; // m/s
 
   if(t < 4){
   }
@@ -151,7 +151,7 @@ void setTarget(float t, float deltat){
     target_f[k] = target_f[k] + positionChange[k];
   }
   target[0] = (long) target_f[0];
-  target[1] = (long) target_f[1];
+  target[1] = (long) -target_f[1];
 }
 
 /*------------ SETUP ------------*/

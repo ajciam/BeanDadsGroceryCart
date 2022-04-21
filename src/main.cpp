@@ -1,88 +1,231 @@
 #include <Arduino.h>
-#include <RobojaxBTS7960.h>
-/*
-Main Code for robot Movement, and soon sensors. Sensors would be contained in different cpp files and 
-*/
+#include <util/atomic.h>   //For time
+#include <Wire.h>  //i2c com
+#include <math.h>
+#include "BTS7960.h"        //Motor Driver Libaray for the double H-Brdige BTS7960
+#include "NewPing.h"
+#include <Ultrasonic.h>
 
 
-// pins for motor 1
-#define RPWM_1 2 // define pin 3 for RPWM pin (output)
-#define R_EN_1 8 // define pin 2 for R_EN pin (input)
-#define R_IS_1 52 // define pin 5 for R_IS pin (output)
+/*------------ CLASS ------------*/
+class SimplePID{
+  private:
+    float kp, kd, ki, umax;
+    float eprev, eintegral;
+    
+  public:
+    // Default initialization list
+    SimplePID() : kp(1), kd(0), ki(0), umax(255), eprev(0.0), eintegral(0.0) {}
+    
+    // Set the parameters
+    void setParams(float kpIn, float kdIn, float kiIn, float umaxIn){
+      kp = kpIn; kd = kdIn; ki = kiIn; umax = umaxIn;
+    }
 
-#define LPWM_1 3 // define pin 6 for LPWM pin (output)
-#define L_EN_1 8 // define pin 7 for L_EN pin (input)
-#define L_IS_1 50 // define pin 8 for L_IS pin (output)
-// motor 1 pins end here
+    // Evaluate the signal
+    void evalu(int value, int target, float deltaT,int &pwr, int &dir){
+        
+      // error
+      int e = target - value;
+      
+      float dedt = (e-eprev)/(deltaT);
+      eintegral = eintegral + e*deltaT;
+      float u = kp*e + kd*dedt + ki*eintegral;
+    
+      // motor power
+      pwr = (int) fabs(u);
+      if( pwr > umax ){
+        pwr = umax;
+      }
+           
+      // motor direction
+      dir = 1;
+      if(u<0){
+        dir = -1;
+      }
+            
+      // store previous error
+      eprev = e;
+    }
+    
+};
 
-// pins for motor 2
-#define RPWM_2 9 // define pin 9 for RPWM pin (output)
-#define R_EN_2 10 // define pin 10 for R_EN pin (input)
-#define R_IS_2 12 // define pin 12 for R_IS pin (output)
+/*------------ GLOBALS AND DEFINITIONS ------------*/
+// Define the motors
+#define NMOTORS 2
+#define M0 0
+#define M1 1
+const int enca[] = {18,2};
+const int encb[]= {19,3};
+const int pwm_R[] = {5,6};
+const int pwm_L[] = {4,7};
+const int EN[] = {8,8}; //Enable pins for motors
+//Define the ultrasonic sensors
+#define TRIGGER_PIN  51
+#define ECHO_PIN     50
+#define MAX_DISTANCE 400
+// Global variables
+long prevT = 0;
+int posPrev[] = {0,0};
+int distance= 0;
+// positions
+volatile int posi[] = {0,0};
 
-#define LPWM_2 11 // define pin 11 for LPWM pin (output)
-#define L_EN_2 A0 // define pin 7 for L_EN pin (input)
-#define L_IS_2 A1 // define pin 8 for L_IS pin (output)
-// motor 2 pins end here
+// PID classes
+SimplePID pid[NMOTORS];
+Ultrasonic ultrasonic1(TRIGGER_PIN, ECHO_PIN);
+//NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
+//Motor Classes
+//BTS7960 motorController[NMOTORS]; // define motor 1 objects
 
-#define EN_1 8
-#define L_PWM_1 3
-#define R_PWM_1 2
-// Right Motor
-#define EN_2 8
-#define L_PWM_2 4
-#define R_PWM_2 5
 
-#define CW 1 //
-#define CCW 0 //
-#define debug 1 //
+/*------------ FUNCTIONS ------------*/
 
-RobojaxBTS7960 motor1(R_EN_1,RPWM_1,R_IS_1, L_EN_1,LPWM_1,L_IS_1,debug);//define motor 1 object
-RobojaxBTS7960 motor2(R_EN_2,RPWM_2,R_IS_2, L_EN_2,LPWM_2,L_IS_2,debug);//define motor 2 object and the same way for other motors
 
-void setup() {
-  // BTS7960 Motor Control Code by Robojax.com 20190622
-  Serial.begin(9600);// setup Serial Monitor to display information
-
-   motor1.begin();
-   motor2.begin();   
-   
-    // BTS7960 Motor Control Code by Robojax.com 20190622 
+void setMotor(int dir, int pwmVal, int pwm_R, int pwm_L){
+  int PWMPIN_LEFT = pwm_L;
+  int PWMPIN_RIGHT = pwm_R;
+  if(dir == -1){
+    analogWrite(PWMPIN_LEFT, 0);
+	  delayMicroseconds(100);
+    analogWrite(PWMPIN_RIGHT, pwmVal);
+  }
+  else if(dir == 1){
+    analogWrite(PWMPIN_RIGHT, 0);
+	  delayMicroseconds(100);
+    analogWrite(PWMPIN_LEFT, pwmVal);
+  }
+  else{
+    analogWrite(PWMPIN_LEFT, LOW);
+    analogWrite(PWMPIN_RIGHT, HIGH);
+  }  
+}
+template <int j>
+void readEncoder(){
+  int b = digitalRead(encb[j]);
+  if(b > 0){
+    posi[j]++;
+  }
+  else{
+    posi[j]--;
+  }
 }
 
-void loop() {
-   // BTS7960 Motor Control Code by Robojax.com 20190622 
-    motor1.rotate(100,CW);// run motor 1 with 100% speed in CW direction
-    delay(5000);//run for 5 seconds
-    motor1.stop();// stop the motor 1
-    delay(3000);// stop for 3 seconds
-    motor1.rotate(100,CCW);// run motor 1 at 100% speed in CCW direction
-    delay(5000);// run for 5 seconds
-    motor1.stop();// stop the motor 1
-    delay(3000);  // stop for 3 seconds
+// void sendLong(long value){
+//   for(int k=0; k<4; k++){
+//     byte out = (value >> 8*(3-k)) & 0xFF;
+//     Wire.write(out);
+//   }
+// }
 
-    // motor2.rotate(100,CW);// run motor 2 with 100% speed in CW direction
-    // delay(5000);//run for 5 seconds
-    // motor2.stop();// stop the motor 2
-    // delay(3000);// stop for 3 seconds
-    // motor2.rotate(100,CCW);// run motor 2 at 100% speed in CCW direction
-    // delay(5000);// run for 5 seconds
-    // motor2.stop();// stop the motor 2
-    // delay(3000);  // stop for 3 seconds
+// long receiveLong(){
+//   long outValue;
+//   for(int k=0; k<4; k++){
+//     byte nextByte = Wire.read();
+//     outValue = (outValue << 8) | nextByte;
+//   }
+//   return outValue;
+// }
 
-    
-  // slowly speed up the motor 1 from 0 to 100% speed
-    // for(int i=0; i<=100; i++){ 
-    //     motor1.rotate(i,CCW);
-    //     delay(50);
-    // } 
+// targets
+float target_f[] = {0,0,0,0};
+long target[] = {0,0,0,0};
+
+void setTarget(float t, float deltat,int distance){
+
+  float positionChange[4] = {0.0,0.0,0.0,0.0};
+  float pulsesPerTurn = 16*30; //16 pules per revolution * Gear Ratio
+  float pulsesPerMeter = pulsesPerTurn*2.0886;  //Pulses per turn*(1/Wheel cirumfernce (m))
+
+  t = fmod(t,12); // time is in seconds
+  float velocity = .5; // m/s
+
+  if(distance > 200){
+  }
+  else if(distance > 8 && distance < 50){
+    for(int k = 0; k < 4; k++){ 
+      positionChange[k] = velocity*deltat*pulsesPerMeter;
+    }
+  }
+  else if(distance < 8) {
+    for(int k = 0; k < 4; k++){ 
+      positionChange[k] = -velocity*deltat*pulsesPerMeter; 
+    } 
+  }  
+
+  for(int k = 0; k < 4; k++){
+    target_f[k] = target_f[k] + positionChange[k];
+  }
+  target[0] = (long) target_f[0];
+  target[1] = (long) -target_f[1];
+}
+
+/*------------ SETUP ------------*/
+void setup() {
+  Wire.begin();        // join i2c bus
+  Serial.begin(9600);
+  for(int k = 0; k < NMOTORS; k++){
+    pinMode(EN[k],OUTPUT);
+    digitalWrite(EN[k],HIGH); //Enable motor Driver
+    pinMode(enca[k],INPUT);
+    pinMode(encb[k],INPUT);
+    pid[k].setParams(1,0,0,255);
+  }
+  attachInterrupt(digitalPinToInterrupt(enca[M0]),readEncoder<M0>,RISING);
+  attachInterrupt(digitalPinToInterrupt(enca[M1]),readEncoder<M1>,RISING);
   
-  //  // slow down the motor  2 from 100% to 0 with 
-  //   for(int i=100; i>0; i--){ 
-  //       motor2.rotate(i,CCW);
-  //       delay(50);
-  //   } 
-//     motor2.stop();// stop motor 2
-//     delay(3000); // stop for 3 seconds        
-//  // BTS7960 more than 1 Motor Control Code by Robojax.com 20190622  
- }// loop ends
+}
+/*------------ LOOP ------------*/
+void loop() {
+
+  // time difference
+  long currT = micros();
+  float deltaT = ((float) (currT - prevT))/( 1.0e6 );
+  prevT = currT;
+  int distnace = ultrasonic1.read();
+    
+  // set target position
+  setTarget(currT/1.0e6,deltaT,distnace);
+  
+  // Send the requested position to the follower
+  
+
+  // Get the current position from the follower
+  
+
+  // Read the position in an atomic block to avoid a potential misread 
+  int pos[] = {0,0};
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+    for(int k = 0; k < NMOTORS; k++){
+      pos[k] = posi[k];
+    }
+  }
+
+  // Loop through the motors
+  for(int k = 0; k < NMOTORS; k++){
+    int pwr, dir;
+    pid[k].evalu(pos[k],target[k],deltaT,pwr,dir); // compute the position
+    //setMotor(dir,pwr,pwm[k],in1[k],in2[k]); // signal the motor
+    setMotor(dir,pwr,pwm_R[k],pwm_L[k]); //signal the motor
+  
+  }
+
+  // for(int i = 0; i<2; i++){
+  //   Serial.print(target[i]);
+  //   Serial.print(" ");
+  // }
+  // for(int i = 0; i<2; i++){
+  //   Serial.print(pos[i]);
+  //   Serial.print(" ");
+  // }
+  // Serial.println();
+  //distance = sonar.ping_cm();
+  
+  // Send results to Serial Monitor
+  Serial.print("Sensor 01: ");
+  Serial.print(ultrasonic1.read()); // Prints the distance on the default unit (centimeters)
+  Serial.println("cm");
+
+  //setMotor(-1,50,pwm_R[0],pwm_L[0]);
+  
+}
