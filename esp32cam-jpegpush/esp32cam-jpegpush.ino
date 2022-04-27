@@ -2,8 +2,8 @@
 #include <WiFi.h>
 #include <esp32cam.h>
  
-const char* WIFI_SSID = "TheHouse";
-const char* WIFI_PASS = "403House$";
+const char* WIFI_SSID = "utexas-iot";
+const char* WIFI_PASS = "59551002838320796686";
  
 WebServer server(80);
  
