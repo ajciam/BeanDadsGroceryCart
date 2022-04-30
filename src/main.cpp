@@ -168,7 +168,16 @@ void setTarget(float t, float deltat, int distanceLeft,int distanceRight,int dis
 
   // Logic for the Sensors here; probably better to seprate into seperate fuctnion, but with the way PID is implemented this was easier
   // More readble if done in Switch cases or State Machines but for now its fine
-  if (((distanceLeft > 200)  || (distanceLeft > 16 && distanceLeft <= 30)) || ((distanceRight > 200)  
+  if (rightIRStatus == 0) // Right Turn Condition
+  {
+    positionChange[0] = velocity * deltat * pulsesPerMeter; // Turn Left wheel
+  }
+  else if (leftIRStatus == 0) // Right Turn Condition
+  {
+    positionChange[1] = velocity * deltat * pulsesPerMeter; // Turn Right wheel
+  }
+  
+  else if (((distanceLeft > 200)  || (distanceLeft > 16 && distanceLeft <= 30)) || ((distanceRight > 200)  
   || (distanceRight > 16 && distanceRight <= 30)) || ((distanceMiddle > 200)  
   || (distanceMiddle > 16 && distanceMiddle <= 30))) //STop conditons
   {
@@ -193,14 +202,7 @@ void setTarget(float t, float deltat, int distanceLeft,int distanceRight,int dis
       positionChange[k] = -velocity * deltat * pulsesPerMeter;
     }
   }
-  else if (rightIRStatus == 0) // Right Turn Condition
-  {
-    positionChange[0] = velocity * deltat * pulsesPerMeter; // Turn Left wheel
-  }
-  else if (leftIRStatus == 0) // Right Turn Condition
-  {
-    positionChange[1] = velocity * deltat * pulsesPerMeter; // Turn Right wheel
-  }
+  
   for (int k = 0; k < 2; k++)
   {
     target_f[k] = target_f[k] + positionChange[k];
@@ -219,7 +221,7 @@ void setup()
     digitalWrite(EN[k], HIGH); // Enable motor Driver
     pinMode(enca[k], INPUT);
     pinMode(encb[k], INPUT);
-    pid[k].setParams(1.5, .2, 0, 255);
+    pid[k].setParams(.9, 0, .1, 255);
   }
   attachInterrupt(digitalPinToInterrupt(enca[M0]), readEncoder<M0>, RISING);
   attachInterrupt(digitalPinToInterrupt(enca[M1]), readEncoder<M1>, RISING);
