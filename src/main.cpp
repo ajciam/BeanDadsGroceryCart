@@ -70,6 +70,12 @@ const int EN[] = {8, 8}; // Enable pins for motors
 #define TRIGGER_PIN 51
 #define ECHO_PIN 50
 #define MAX_DISTANCE 400
+#define TRIGGER_PIN_RIGHT 49
+#define ECCH_PIN_RIGHT 48
+#define MAX_DISTANCE_RIGHT 400
+#define TRIGGER_PIN_MIDDLE 47
+#define ECCH_PIN_MIDDLE 46
+#define MAX_DISTANCE_MIDDLE 400
 
 // IR Sensors
 int rightIR = 44; // connect ir sensor out to pin 44
@@ -87,6 +93,8 @@ volatile int posi[] = {0, 0};
 SimplePID pid[NMOTORS];
 // Ultrasonic ultrasonic1(TRIGGER_PIN, ECHO_PIN);
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
+NewPing sonarRight(TRIGGER_PIN_RIGHT,ECCH_PIN_RIGHT,MAX_DISTANCE_RIGHT);
+NewPing sonarMiddle(TRIGGER_PIN_MIDDLE,ECCH_PIN_MIDDLE,MAX_DISTANCE_MIDDLE);
 // Motor Classes
 // BTS7960 motorController[NMOTORS]; // define motor 1 objects
 
@@ -148,7 +156,7 @@ void readEncoder()
 float target_f[] = {0, 0, 0, 0};
 long target[] = {0, 0, 0, 0};
 
-void setTarget(float t, float deltat, int distance, int rightIRStatus, int leftIRStatus)
+void setTarget(float t, float deltat, int distanceLeft,int distanceRight,int distanceMiddle, int rightIRStatus, int leftIRStatus)
 {
 
   float positionChange[4] = {0.0, 0.0, 0.0, 0.0};
@@ -156,26 +164,29 @@ void setTarget(float t, float deltat, int distance, int rightIRStatus, int leftI
   float pulsesPerMeter = pulsesPerTurn * 2.0886; // Pulses per turn*(1/Wheel cirumfernce (m))
 
   t = fmod(t, 12);     // time is in seconds to repeated a movment cycle over 12 seconds
-  float velocity = .5; // m/s
+  float velocity = .3; // m/s
 
   // Logic for the Sensors here; probably better to seprate into seperate fuctnion, but with the way PID is implemented this was easier
   // More readble if done in Switch cases or State Machines but for now its fine
-  if (distance > 200 || distance <2 || (distance > 10 && distance <= 30))
+  if (((distanceLeft > 200)  || (distanceLeft > 16 && distanceLeft <= 30)) || ((distanceRight > 200)  
+  || (distanceRight > 16 && distanceRight <= 30)) || ((distanceMiddle > 200)  
+  || (distanceMiddle > 16 && distanceMiddle <= 30))) //STop conditons
   {
     for (int k = 0; k < 4; k++)
     {
       positionChange[k] = 0;
     }
   }
-  else if (distance > 20 && distance < 100 && rightIRStatus == 1 && leftIRStatus == 1) // FWD Condition
+  else if ((distanceLeft > 20 && distanceLeft < 100) &&((distanceRight > 20 && distanceRight < 100)) && ((distanceMiddle > 20 && distanceMiddle < 100))) // FWD Condition
   {
     for (int k = 0; k < 4; k++)
     {
       positionChange[k] = velocity * deltat * pulsesPerMeter;
     }
   }
-  else if (distance < 20 && rightIRStatus == 1 && leftIRStatus == 1) // Revesere condition
-  {
+  else if ((distanceLeft < 15 && distanceLeft >2) || ((distanceRight < 15 && distanceRight >2)
+  || (distanceMiddle < 15 && distanceMiddle >2)) )//&& rightIRStatus == 1 && leftIRStatus == 1) // Revesere condition
+  { 
     velocity = .3;
     for (int k = 0; k < 4; k++)
     {
@@ -190,7 +201,7 @@ void setTarget(float t, float deltat, int distance, int rightIRStatus, int leftI
   {
     positionChange[1] = velocity * deltat * pulsesPerMeter; // Turn Right wheel
   }
-  for (int k = 0; k < 4; k++)
+  for (int k = 0; k < 2; k++)
   {
     target_f[k] = target_f[k] + positionChange[k];
   }
@@ -208,7 +219,7 @@ void setup()
     digitalWrite(EN[k], HIGH); // Enable motor Driver
     pinMode(enca[k], INPUT);
     pinMode(encb[k], INPUT);
-    pid[k].setParams(1, 0, 0, 255);
+    pid[k].setParams(1.5, .2, 0, 255);
   }
   attachInterrupt(digitalPinToInterrupt(enca[M0]), readEncoder<M0>, RISING);
   attachInterrupt(digitalPinToInterrupt(enca[M1]), readEncoder<M1>, RISING);
@@ -224,14 +235,15 @@ void loop()
   long currT = micros();
   float deltaT = ((float)(currT - prevT)) / (1.0e6);
   prevT = currT;
-  int distance = sonar.ping_cm(); // Distnace Calcuaiton for US sensor
-
+  int distanceLeft = sonar.ping_cm(); // Distnace Calcuaiton for US sensor
+  int distanceRight = sonarRight.ping_cm(); //Distance for front right ultrasonic sensor
+  int distanceMiddle = sonarMiddle.ping_cm(); //Distance for front middle ultrasonic sensor
 
   //.int distnace = ultrasonic1.read(); //Distnace w/ ultrasonic lib.
   int statusIR[] = {digitalRead(rightIR), digitalRead(leftIR)}; // Read IR Sensors and puty
 
   // set target position
-  setTarget(currT / 1.0e6, deltaT, distance, statusIR[0], statusIR[1]);
+  setTarget(currT / 1.0e6, deltaT, distanceLeft,distanceRight,distanceMiddle, statusIR[0], statusIR[1]);
 
   // Send the requested position to the follower
 
@@ -272,10 +284,17 @@ void loop()
   if (currentMillis - previousMillis >= printInterval)
   { // enough time passed yet?
     previousMillis = currentMillis;
-    Serial.print("Sensor 01: ");
-    Serial.print(distance); // Prints the distance on the default unit (centimeters)
-    Serial.println("cm");
-    Serial.println(statusIR[1]);
+    Serial.println("Sensor Right: ");
+    Serial.println(distanceRight); // Prints the distance on the default unit (centimeters)
+    Serial.print("cm");
+    Serial.println("Sensor Left:");
+    Serial.println(distanceLeft); // Prints the distance on the default unit (centimeters)
+    Serial.print("cm");
+    Serial.println("Sensor Middle");
+    Serial.println(distanceMiddle); // Prints the distance on the default unit (centimeters)
+    Serial.print("cm");
+
+
   }
   // setMotor(-1,50,pwm_R[0],pwm_L[0]);
 }
