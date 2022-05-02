@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "beanbot-detect",
+  "private_key_id": "fbe8afa3e3a81c1e60c1c36a1a02026a5d88eb99",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDsVuGFodjA+GYJ\n+Zfz9kzBgApN8xm3S98iuwWzdpPmn0z7eCNx6SqCCT9WMxcXhvVSG8iU11DTh/iy\nPKP+k3NS6geQbgmrkXlF+tZfLkyp7ZitsvgqFu68UJ8la3Be9tCyUgky7FU39CXU\nOTnaNMz5suAsIUA5Td0E+HEYb4eszshKBixL4G6YY2cfMfa4OjM1UtV9qFYvXZps\nAbVId87SPf6Bo3YmteX6dEojrGT3tweX19Z933+Sxg4tMuBHujrvFmHS0HkZcoDH\nTXfSFbuui5h4nEK3FN+4xTgecZrzcQIPTsrZ5U4TE2fpMPXraDgIlBf0ljowk9fn\nKg0adIL9AgMBAAECggEAHLakgSoL7cvwB7u3gqgUpLiz58sGf467/hn3RBm+t9j4\nTyAGPGdt5u0NMSGVZ2IZ6X8fJDgxpXWCWVNFQF91NihhQWKhEaNjtsUWKOu03DtV\n3pqdDG4LVL09zJvMQ/lcGyIc5H8yjlD/DJTkSra6BYc+NZZXmW60kM9HXEbmlq+w\nAHUFurrSsScsQwY03bJyJKg+ax34VmzNsFI9cz23cIvxCKUNancYs9T/kaUH3RhK\nx7iyIicVbsoovc/nOdjCAshehdw+JMdVoE4cM49C6JCD3TqLUbukFfVUWSaEbmlc\nqjl+CygsXnpWsvx8HSOqHsKhNy1RyLygE5+KTc+syQKBgQD2sr6xj5u9FxfpgInc\n6oo75vgG7sPq+ga5OM0KSjwrIA0c92u7JQVOJ6XQV2f6mdRGwhhR9A04NXCiwBlz\nxVO/u0QArccsbZY/H6J/u4UZtDiB5YTfgV01RlFx4rsfFOpeFa3pALRmqLmfL8Q7\n12Qv96iAYJ/6QOVsBO0Ize/9NQKBgQD1QCW0wtuVekIMgv/INJxuVBLEvYQNss6R\nntoambBuyjx4GHhenCudv+1SC7coGyZdQrolH/696XrkNoqOdirHtMUlsmH/d2Gm\nIfMFWGOGX4ZItyLpkivFf+LnqeSec2EDNKl3VT/eqEKc8oUu3YSGiYuk5R6oXPvn\nrxjnm7dPqQKBgBGRWwkT+/g0O8yyDZ9AyIVJhmIgAK2sDmyEQf24mZ5MkwJ8EBzs\nnvsY0bMLdmkfKUG8srSrV4GoNJQyb92RsMwXjtkphuSADVIDc7P665iP//IoIRU1\nhii0EDq29bJZ7/KxQog0N6ST4VwXr7a/OPA9h69Usi/FDVFq7GJTIAL9AoGAdo82\nKzZv9MkPmQDTKjPU07ktAZMkfYLNPbRvd6CInGaD6QLbXdFdfHtF/P3Q40CMwVT6\nq+vVuHVghWaggNI7SCPpkpmzqk5KFIgg9ZqPMmyHfCucYxHYuzdht+B3tunMIkKZ\nEilSIQ9ydHEBVXCdGnTv3x0sPvQEizIodf7fFVECgYBeeFCWHis27Mzna4icAcDZ\nYJeO3FKakKnT0dzDY7KPFuUhnjiFnZMFJtdP7p1/MSnMSIgqQw55YGEajm2JjuS1\nW9cJlYStj/DL4jrAGL3W088hx0J5MIgetddr0nqy8XNCPYgttVKzBm49kCjI1Tw6\neFxwVsvTiLy+bdDQMAsBgA==\n-----END PRIVATE KEY-----\n",
+  "client_email": "madeleinejabs@beanbot-detect.iam.gserviceaccount.com",
+  "client_id": "106955617470642731253",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/madeleinejabs%40beanbot-detect.iam.gserviceaccount.com"
+}

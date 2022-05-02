@@ -4,6 +4,9 @@
  
 const char* WIFI_SSID = "utexas-iot";
 const char* WIFI_PASS = "59551002838320796686";
+
+//const char* WIFI_SSID = "House of Commons";
+//const char* WIFI_PASS = "cucumber";
  
 WebServer server(80);
  
