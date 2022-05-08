@@ -1,5 +1,18 @@
 # BeanDadsGroceryCart
-Software files are Ardunio Sketches and Examples used.
+--------------------------------------------------------------------------
+
+Setup Instructions for Ardunio IDE (Basic)
+1. Download main.cpp and renzme main.ino
+2. In the Ardunio IDE download the "NewPing" library
+3. Change any pins to match your wiring configuration (encoder pins, sensor pins)
+4. Load main.ino in the Ardunio IDE, select the proper serial port for your board and flash the file to your board
+
+
+
+
+
+
+--------------------------------------------------------------------------
 
 Main files are in Bean Dads Grocery Cart.
 
