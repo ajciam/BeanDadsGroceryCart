@@ -96,13 +96,6 @@ def draw_bounding_boxes(filename, objects):
     img.show()
 
 def main():
-    
-    # uri = 'http://10.147.16.136/cam-hi.jpg'
-    # filename = download_image(uri)
-    # objects = detect_objects(filename)
-    # labels = detect_labels(filename)
-    # draw_bounding_boxes(filename, objects)
-
     # Print objects every 5 seconds
     uri = 'http://10.147.16.136/cam-hi.jpg'
     start = time()
