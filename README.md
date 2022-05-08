@@ -57,6 +57,8 @@ const char* WIFI_PASS = "59551002838320796686";
 pythonfiles contains a few avenues for pulling the image from the internet and doing some sort of processing with it
 current avenues for exploration. Out of all of them, barcode scanning and Google Vision API object detection are the most promising.
 
-The "Object Detection" folder contains a comic sans font file, the python file that downloads an image from esp32's dedicated url and performs object detection through Google Cloud. Critically, the code will not work from any computer besides Madeleine's currently because only Madeleine's computer has the JSON key needed to authenticate with Google. Pushing it to the repository would be a security issue. Lastly, there are jpeg files in the folder that correspond to images downloaded from the internet by the python file.
-
-The plan is to develop a python application and launch it to mobile using Beeware.
+The "Object Detection" folder contains a comic sans font file, the python file that downloads an image from esp32's dedicated url and performs object detection through Google Cloud. Critically, the code will not work from any computer besides Madeleine's currently because only Madeleine's computer has the JSON key needed to authenticate with Google. Pushing it to the repository would be a security issue. Lastly, there are jpeg files in the folder that correspond to images downloaded from the internet by the python file. 
+If you happen to have a Google Cloud JSON key, you can run the object detection script by running the following commands in the command prompt for the directory that contains the python file
+> set GOOGLE_APPLICATION_CREDENTIALS = path_of_JSON_Key
+> python object-detect.py
+Note: the python relies on you having pushed the arduino code to a powered ESP-32. Otherwise, it won't be able to pull an image from the internet.
