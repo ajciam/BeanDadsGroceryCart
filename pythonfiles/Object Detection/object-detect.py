@@ -1,6 +1,8 @@
+from time import time, sleep
 from PIL import Image, ImageDraw, ImageFont
 import requests
 import shutil
+import psutil
 
 ''' 
 Download an image from a uri. This function is necessary because we are streaming a raw jpeg and therefore need to copy
@@ -28,6 +30,12 @@ def download_image(uri):
         print('Image Couldn\'t be retreived')
     return filename
 
+def hide_images():
+    for proc in psutil.process_iter():
+        print(proc.name())
+        if proc.name() == "display":
+            proc.kill()
+
 
 # Takes in an image path and provides a list of objects. Objects have very general names such as 'food' but have bounding boxes
 def detect_objects(filename):
@@ -44,12 +52,12 @@ def detect_objects(filename):
     objects = client.object_localization(image=image).localized_object_annotations
 
     # Lines below print object info and should be removed later
-    print('Number of objects found: {}'.format(len(objects)))
-    for object_ in objects:
-        print('\n{} (confidence: {})'.format(object_.name, object_.score))
-        print('Normalized bounding polygon vertices: ')
-        for vertex in object_.bounding_poly.normalized_vertices:
-            print(' - ({}, {})'.format(vertex.x, vertex.y))
+    # print('Number of objects found: {}'.format(len(objects)))
+    # for object_ in objects:
+    #     print('\n{} (confidence: {})'.format(object_.name, object_.score))
+    #     print('Normalized bounding polygon vertices: ')
+    #     for vertex in object_.bounding_poly.normalized_vertices:
+    #         print(' - ({}, {})'.format(vertex.x, vertex.y))
     return objects
 
 # Takes in an image path and provides a list of labels. Labels are more specific than object names but have no bounding boxes.
@@ -68,9 +76,9 @@ def detect_labels(filename):
     labels = response.label_annotations
 
     # Lines below print label info and should be removed later
-    print('Labels:')
-    for label in labels:
-        print(label.description)
+    # print('Labels:')
+    # for label in labels:
+    #     print(label.description)
     return labels
 
 # Takes in an image path and a list of objects in that image and draws a bounding box around each object.
@@ -88,12 +96,25 @@ def draw_bounding_boxes(filename, objects):
     img.show()
 
 def main():
-    uri = 'http://192.168.1.66/cam-hi.jpg'
-    # uri = 'https://upload.wikimedia.org/wikipedia/commons/8/8a/Banana-Single.jpg'
-    filename = download_image(uri)
-    objects = detect_objects(filename)
-    labels = detect_labels(filename)
-    draw_bounding_boxes(filename, objects)
+    
+    # uri = 'http://10.147.16.136/cam-hi.jpg'
+    # filename = download_image(uri)
+    # objects = detect_objects(filename)
+    # labels = detect_labels(filename)
+    # draw_bounding_boxes(filename, objects)
+
+    # Print objects every 5 seconds
+    uri = 'http://10.147.16.136/cam-hi.jpg'
+    start = time()
+    interval = 5
+    while True:
+        filename = download_image(uri)
+        objects = detect_objects(filename)
+        # hide_images()
+        draw_bounding_boxes(filename, objects)
+        sleep(interval - ((time() - start) % interval))
+
+
 
 if __name__ == '__main__':
     main()
